@@ -1,0 +1,11 @@
+package com.vetlink.pet.tracker.shared.domain.exceptions;
+
+public class ResourceNotFoundException extends RuntimeException{
+    public ResourceNotFoundException(){
+        super();
+    }
+
+    public ResourceNotFoundException(String message){
+        super(message);
+    }
+}
