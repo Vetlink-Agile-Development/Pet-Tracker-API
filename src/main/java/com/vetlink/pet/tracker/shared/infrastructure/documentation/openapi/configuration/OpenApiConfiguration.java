@@ -18,13 +18,13 @@ public class OpenApiConfiguration {
         var openApi = new OpenAPI();
         openApi
                 .info(new Info()
-                        .title("Digital-Dart Guardian-Area API")
-                        .description("Digital-Dart Guardian-Area application REST API documentation.")
+                        .title("Vet-Link Pet-Tracker API")
+                        .description("Vet-Link Pet-Tracker application REST API documentation.")
                         .version("v1.0.0")
                         .license(new License().name("Apache 2.0")
                                 .url("https://www.apache.org/licenses/LICENSE-2.0.html")))
                 .externalDocs(new ExternalDocumentation()
-                        .description("Digital-Dart Guardian-Area Wiki Documentation")
+                        .description("Vet-Link Pet-Tracker Wiki Documentation")
                         .url(""));
         // Add Security Scheme
         final String securitySchemeName = "bearerAuth";
