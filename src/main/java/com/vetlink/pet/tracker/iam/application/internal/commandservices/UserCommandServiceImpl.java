@@ -5,6 +5,7 @@ import com.vetlink.pet.tracker.iam.application.internal.outboundservices.tokens.
 import com.vetlink.pet.tracker.iam.domain.model.aggregates.User;
 import com.vetlink.pet.tracker.iam.domain.model.commands.SignInCommand;
 import com.vetlink.pet.tracker.iam.domain.model.commands.SignUpCommand;
+import com.vetlink.pet.tracker.iam.domain.model.commands.UpdateUserCommand;
 import com.vetlink.pet.tracker.iam.domain.model.valueobjects.Roles;
 import com.vetlink.pet.tracker.iam.domain.services.UserCommandService;
 import com.vetlink.pet.tracker.iam.infrastructure.persistence.jpa.repositories.RoleRepository;
@@ -56,5 +57,30 @@ public class UserCommandServiceImpl implements UserCommandService {
         var currentUser = user.get();
         var token = tokenService.generateToken(currentUser.getUsername());
         return Optional.of(ImmutablePair.of(currentUser, token));
+    }
+
+    @Override
+    public Optional<User> handle(UpdateUserCommand command) {
+        var user = userRepository.findById(command.userId());
+        if (user.isEmpty()) {
+            throw new ResourceNotFoundException("User not found");
+        }
+        
+        var roles = command.roles();
+        if (roles != null && !roles.isEmpty()) {
+            roles = command.roles().stream()
+                    .map(role -> roleRepository.findByName(role.getName())
+                            .orElseThrow(() -> new ResourceNotFoundException("Role not found")))
+                    .toList();
+        }
+        
+        var password = command.password();
+        if (password != null && !password.isEmpty()) {
+            password = hashingService.encode(password);
+        }
+        
+        user.get().updateUser(command.email(), command.firstName(), command.lastName(), password, roles);
+        userRepository.save(user.get());
+        return user;
     }
 }

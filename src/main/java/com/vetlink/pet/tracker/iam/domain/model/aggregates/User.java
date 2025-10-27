@@ -72,4 +72,21 @@ public class User extends AuditableAbstractAggregateRoot<User> {
         return this;
     }
 
+    public User updateUser(String email, String firstName, String lastName, String password, List<Role> roles) {
+        if (email != null && !email.isEmpty()) {
+            this.email = new EmailAddress(email);
+        }
+        if (firstName != null && lastName != null && !firstName.isEmpty() && !lastName.isEmpty()) {
+            this.personName = new PersonName(firstName, lastName);
+        }
+        if (password != null && !password.isEmpty()) {
+            this.password = password;
+        }
+        if (roles != null && !roles.isEmpty()) {
+            this.roles.clear();
+            addRoles(roles);
+        }
+        return this;
+    }
+
 }
