@@ -3,6 +3,7 @@ package com.vetlink.pet.tracker.monitoring.application.internal.queyservices;
 import com.vetlink.pet.tracker.monitoring.application.internal.outboundservices.acl.ExternalIamService;
 import com.vetlink.pet.tracker.monitoring.domain.model.aggregates.Device;
 import com.vetlink.pet.tracker.monitoring.domain.model.queries.GetAllDevicesByUserIdQuery;
+import com.vetlink.pet.tracker.monitoring.domain.model.queries.GetAllDevicesQuery;
 import com.vetlink.pet.tracker.monitoring.domain.model.queries.GetDeviceByPetTrackerDeviceRecordIdQuery;
 import com.vetlink.pet.tracker.monitoring.domain.services.DeviceQueryService;
 import com.vetlink.pet.tracker.monitoring.infrastructure.persistence.jpa.repositories.DeviceRepository;
@@ -39,5 +40,10 @@ public class DeviceQueryServiceImpl implements DeviceQueryService {
             throw new ResourceNotFoundException("Device not found");
         }
         return device;
+    }
+
+    @Override
+    public List<Device> handle(GetAllDevicesQuery query) {
+        return deviceRepository.findAll();
     }
 }

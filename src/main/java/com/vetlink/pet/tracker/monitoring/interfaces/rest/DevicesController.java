@@ -1,5 +1,6 @@
 package com.vetlink.pet.tracker.monitoring.interfaces.rest;
 
+import com.vetlink.pet.tracker.monitoring.domain.model.queries.GetAllDevicesQuery;
 import com.vetlink.pet.tracker.monitoring.domain.model.queries.GetDeviceByPetTrackerDeviceRecordIdQuery;
 import com.vetlink.pet.tracker.monitoring.domain.model.valueobjects.PetTrackerDeviceRecordId;
 import com.vetlink.pet.tracker.monitoring.domain.services.DeviceCommandService;
@@ -11,6 +12,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(value = "/api/v1/devices", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -46,6 +50,16 @@ public class DevicesController {
         return new ResponseEntity<>(apiKeyResource, HttpStatus.CREATED);
     }
 
+    @GetMapping
+    public ResponseEntity<List<DeviceResource>> getAllDevices() {
+        var getAllDevicesQuery = new GetAllDevicesQuery();
+        var devices = deviceQueryService.handle(getAllDevicesQuery);
+        var deviceResources = devices.stream()
+                .map(DeviceResourceFromEntityAssembler::toResourceFromEntity)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(deviceResources);
+    }
+
     @GetMapping("/{deviceRecordId}")
     public ResponseEntity<DeviceResource> getDeviceByDeviceRecordId(@PathVariable String deviceRecordId) {
         var petTrackerDeviceRecordId = new PetTrackerDeviceRecordId(deviceRecordId);
@@ -67,5 +81,15 @@ public class DevicesController {
         }
         var deviceResource = DeviceResourceFromEntityAssembler.toResourceFromEntity(device.get());
         return ResponseEntity.ok(deviceResource);
+    }
+
+    @DeleteMapping("/{deviceRecordId}")
+    public ResponseEntity<Void> deleteDeviceByDeviceRecordId(@PathVariable String deviceRecordId) {
+        var deleteDeviceCommand = DeleteDeviceCommandFromResourceAssembler.toCommandFromResource(deviceRecordId);
+        var deleted = deviceCommandService.handle(deleteDeviceCommand);
+        if (!deleted) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.noContent().build();
     }
 }
