@@ -4,6 +4,7 @@ import com.vetlink.pet.tracker.monitoring.application.internal.outboundservices.
 import com.vetlink.pet.tracker.monitoring.application.internal.outboundservices.acl.ExternalIamService;
 import com.vetlink.pet.tracker.monitoring.domain.model.aggregates.Device;
 import com.vetlink.pet.tracker.monitoring.domain.model.commands.AssignDeviceCommand;
+import com.vetlink.pet.tracker.monitoring.domain.model.commands.DeleteDeviceCommand;
 import com.vetlink.pet.tracker.monitoring.domain.model.commands.RegisterDeviceCommand;
 import com.vetlink.pet.tracker.monitoring.domain.model.commands.UpdateDeviceCommand;
 import com.vetlink.pet.tracker.monitoring.domain.model.commands.UpdateHealthThresholdsCommand;
@@ -80,5 +81,15 @@ public class DeviceCommandServiceImpl implements DeviceCommandService {
         device.get().UpdateHealthThresholds(command);
         deviceRepository.save(device.get());
         return device;
+    }
+
+    @Override
+    public boolean handle(DeleteDeviceCommand command) {
+        var device = deviceRepository.findByPetTrackerDeviceRecordId(command.petTrackerDeviceRecordId());
+        if (device.isEmpty()) {
+            throw new ResourceNotFoundException("Device not found");
+        }
+        deviceRepository.delete(device.get());
+        return true;
     }
 }
