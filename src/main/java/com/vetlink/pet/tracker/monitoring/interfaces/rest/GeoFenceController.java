@@ -57,4 +57,14 @@ public class GeoFenceController {
         var geoFenceResource = GeoFenceResourceFromEntityAssembler.toResourceFromEntity(geoFence.get());
         return ResponseEntity.ok(geoFenceResource);
     }
+
+    @DeleteMapping("/{geoFenceId}")
+    public ResponseEntity<Void> deleteGeoFenceById(@PathVariable Long geoFenceId) {
+        var deleteGeoFenceCommand = new com.vetlink.pet.tracker.monitoring.domain.model.commands.DeleteGeoFenceCommand(geoFenceId);
+        var deleted = geoFenceCommandService.handle(deleteGeoFenceCommand);
+        if (!deleted) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.noContent().build();
+    }
 }

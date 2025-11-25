@@ -2,6 +2,7 @@ package com.vetlink.pet.tracker.monitoring.application.internal.commandservices;
 
 import com.vetlink.pet.tracker.monitoring.domain.model.aggregates.GeoFence;
 import com.vetlink.pet.tracker.monitoring.domain.model.commands.CreateGeoFenceCommand;
+import com.vetlink.pet.tracker.monitoring.domain.model.commands.DeleteGeoFenceCommand;
 import com.vetlink.pet.tracker.monitoring.domain.model.commands.UpdateGeoFenceCommand;
 import com.vetlink.pet.tracker.monitoring.domain.services.GeoFenceCommandService;
 import com.vetlink.pet.tracker.monitoring.infrastructure.persistence.jpa.repositories.DeviceRepository;
@@ -47,5 +48,15 @@ public class GeoFenceCommandServiceImpl implements GeoFenceCommandService {
         geoFence.get().updateGeofence(command);
         geoFenceRepository.save(geoFence.get());
         return geoFence;
+    }
+
+    @Override
+    public boolean handle(DeleteGeoFenceCommand command) {
+        var geoFence = geoFenceRepository.findById(command.geoFenceId());
+        if (geoFence.isEmpty()) {
+            throw new ResourceNotFoundException("GeoFence not found");
+        }
+        geoFenceRepository.delete(geoFence.get());
+        return true;
     }
 }
