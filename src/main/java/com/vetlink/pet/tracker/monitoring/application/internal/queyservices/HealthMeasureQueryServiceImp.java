@@ -40,8 +40,8 @@ public class HealthMeasureQueryServiceImp implements HealthMeasureQueryService {
             throw new ResourceNotFoundException("Device does not exist");
         }
         LocalDate currentDate = LocalDate.now();
-        int currentMonth = currentDate.getMonthValue();
-        int currentYear = currentDate.getYear();
-        return healthMeasureRepository.findDailyAveragesForCurrentMonthAndGuardian(currentMonth, currentYear, device.get().getPetTrackerDeviceRecordId());
+        int month = query.month() != null ? query.month() : currentDate.getMonthValue();
+        int year = query.year() != null ? query.year() : currentDate.getYear();
+        return healthMeasureRepository.findDailyAveragesForCurrentMonthAndGuardian(month, year, device.get().getPetTrackerDeviceRecordId());
     }
 }

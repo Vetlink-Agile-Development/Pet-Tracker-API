@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -27,9 +28,12 @@ public class DeviceHealthMeasureController {
     }
 
     @GetMapping
-    public ResponseEntity<List<HealthMeasureDailyAverageResource>> getHealthMeasuresDailyAverageFromCurrentMonthByPetTrackerDeviceRecordId(@PathVariable String deviceRecordId){
+    public ResponseEntity<List<HealthMeasureDailyAverageResource>> getHealthMeasuresDailyAverageFromCurrentMonthByPetTrackerDeviceRecordId(
+            @PathVariable String deviceRecordId,
+            @RequestParam(required = false) Integer month,
+            @RequestParam(required = false) Integer year){
         var petTrackerDeviceRecordId = new PetTrackerDeviceRecordId(deviceRecordId);
-        var getHealthMeasuresDailyAverageFromCurrentMonthByPetTrackerDeviceRecordIdQuery = new GetHealthMeasuresDailyAverageFromCurrentMonthByPetTrackerDeviceRecordIdQuery(petTrackerDeviceRecordId);
+        var getHealthMeasuresDailyAverageFromCurrentMonthByPetTrackerDeviceRecordIdQuery = new GetHealthMeasuresDailyAverageFromCurrentMonthByPetTrackerDeviceRecordIdQuery(petTrackerDeviceRecordId, month, year);
         var healthMeasureDailyAverages = healthMeasureQueryService.handle(getHealthMeasuresDailyAverageFromCurrentMonthByPetTrackerDeviceRecordIdQuery);
         var healthMeasureDailyAveragesResource = healthMeasureDailyAverages.stream().map(HealthMeasureDailyAverageResourceFromEntityAssembler::toResourceFromEntity).toList();
         return ResponseEntity.ok(healthMeasureDailyAveragesResource);
