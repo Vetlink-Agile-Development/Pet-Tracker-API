@@ -1,6 +1,5 @@
 package com.vetlink.pet.tracker.monitoring.interfaces.rest;
 
-import com.vetlink.pet.tracker.monitoring.domain.model.commands.UpdateGeoFenceCommand;
 import com.vetlink.pet.tracker.monitoring.domain.model.queries.GetGeoFenceByIdQuery;
 import com.vetlink.pet.tracker.monitoring.domain.services.GeoFenceCommandService;
 import com.vetlink.pet.tracker.monitoring.domain.services.GeoFenceQueryService;

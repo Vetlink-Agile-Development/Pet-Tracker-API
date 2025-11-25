@@ -5,7 +5,6 @@ import com.vetlink.pet.tracker.monitoring.domain.model.valueobjects.UserId;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Service;
 
-import javax.swing.text.html.Option;
 import java.util.Optional;
 
 @Service
