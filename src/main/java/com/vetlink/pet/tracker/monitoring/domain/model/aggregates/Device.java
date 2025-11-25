@@ -70,6 +70,13 @@ public class Device extends AuditableAbstractAggregateRoot<Device> {
         this.deviceStatuses = DeviceStatuses.CONNECTED;
     }
 
+    public void unassignDevice(){
+        this.userId = null;
+        this.deviceNickname = null;
+        this.bearer = null;
+        this.deviceStatuses = DeviceStatuses.DISCONNECTED;
+    }
+
     public Device(RegisterDeviceCommand command, String apiKey) {
         this.healthThresholds = new HealthThresholds();
         this.userId = null;

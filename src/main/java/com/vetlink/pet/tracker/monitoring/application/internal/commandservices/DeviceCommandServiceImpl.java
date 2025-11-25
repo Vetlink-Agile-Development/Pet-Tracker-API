@@ -6,6 +6,7 @@ import com.vetlink.pet.tracker.monitoring.domain.model.aggregates.Device;
 import com.vetlink.pet.tracker.monitoring.domain.model.commands.AssignDeviceCommand;
 import com.vetlink.pet.tracker.monitoring.domain.model.commands.DeleteDeviceCommand;
 import com.vetlink.pet.tracker.monitoring.domain.model.commands.RegisterDeviceCommand;
+import com.vetlink.pet.tracker.monitoring.domain.model.commands.UnassignDeviceCommand;
 import com.vetlink.pet.tracker.monitoring.domain.model.commands.UpdateDeviceCommand;
 import com.vetlink.pet.tracker.monitoring.domain.model.commands.UpdateHealthThresholdsCommand;
 import com.vetlink.pet.tracker.monitoring.domain.services.DeviceCommandService;
@@ -91,5 +92,26 @@ public class DeviceCommandServiceImpl implements DeviceCommandService {
         }
         deviceRepository.delete(device.get());
         return true;
+    }
+
+    @Override
+    public Optional<Device> handle(UnassignDeviceCommand command) {
+        var userId = externalIamService.fetchUsernameById(command.userId());
+        if (userId.isEmpty()) {
+            throw new ResourceNotFoundException("User not found");
+        }
+        var device = deviceRepository.findByPetTrackerDeviceRecordId(command.petTrackerDeviceRecordId());
+        if (device.isEmpty()) {
+            throw new ResourceNotFoundException("Device not found");
+        }
+        if (device.get().getUserId() == null){
+            throw new ValidationException("Device is not assigned to any user");
+        }
+        if (!device.get().getUserId().equals(userId.get())){
+            throw new ValidationException("Device is not assigned to this user");
+        }
+        device.get().unassignDevice();
+        deviceRepository.save(device.get());
+        return device;
     }
 }

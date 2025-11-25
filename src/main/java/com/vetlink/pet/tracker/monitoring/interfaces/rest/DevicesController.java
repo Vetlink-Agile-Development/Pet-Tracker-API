@@ -39,6 +39,17 @@ public class DevicesController {
         return new ResponseEntity<>(deviceResource, HttpStatus.CREATED);
     }
 
+    @PostMapping("/unassign")
+    public ResponseEntity<DeviceResource> unassignDevice(@RequestBody UnassignDeviceResource unassignDeviceResource){
+        var unassignDeviceCommand = UnassignDeviceCommandFromResourceAssembler.toCommandFromResource(unassignDeviceResource);
+        var device = deviceCommandService.handle(unassignDeviceCommand);
+        if (device.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+        var deviceResource = DeviceResourceFromEntityAssembler.toResourceFromEntity(device.get());
+        return ResponseEntity.ok(deviceResource);
+    }
+
     @PostMapping("/register")
     public ResponseEntity<ApiKeyResource> registerDevice(@RequestBody RegisterDeviceResource registerDeviceResource) {
         var registerDeviceCommand = RegisterDeviceCommandFromResourceAssembler.toCommandFromResource(registerDeviceResource);

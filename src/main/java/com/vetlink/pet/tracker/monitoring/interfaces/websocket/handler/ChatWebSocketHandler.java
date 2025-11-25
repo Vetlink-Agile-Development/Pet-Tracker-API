@@ -1,10 +1,5 @@
 package com.vetlink.pet.tracker.monitoring.interfaces.websocket.handler;
 
-import com.vetlink.pet.tracker.monitoring.domain.model.commands.CreateActivityCommand;
-import com.vetlink.pet.tracker.monitoring.domain.model.queries.GetAllGeoFencesByPetTrackerDeviceRecordIdQuery;
-import com.vetlink.pet.tracker.monitoring.domain.model.valueobjects.*;
-import com.vetlink.pet.tracker.monitoring.interfaces.websocket.resource.CurrentLocationResource;
-import com.vetlink.pet.tracker.monitoring.interfaces.websocket.resource.GpsResource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
