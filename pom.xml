@@ -129,6 +129,13 @@
 			<scope>test</scope>
 		</dependency>
 
+		<!-- Azure Storage Blob -->
+		<dependency>
+			<groupId>com.azure</groupId>
+			<artifactId>azure-storage-blob</artifactId>
+			<version>12.25.1</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>
