@@ -92,6 +92,7 @@ public class WebSecurityConfiguration {
                                 "/chat-stream",
                                 "/swagger-ui/**",
                                 "/swagger-resources/**",
+                                "/uploads/**",
                                 "/webjars/**").permitAll()
                         .anyRequest().authenticated());
         http.authenticationProvider(authenticationProvider());
