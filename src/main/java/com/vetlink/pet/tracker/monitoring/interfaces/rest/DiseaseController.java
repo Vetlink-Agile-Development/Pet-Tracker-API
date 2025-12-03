@@ -2,6 +2,7 @@ package com.vetlink.pet.tracker.monitoring.interfaces.rest;
 
 import com.vetlink.pet.tracker.monitoring.domain.model.aggregates.Disease;
 import com.vetlink.pet.tracker.monitoring.domain.services.DiseaseService;
+import com.vetlink.pet.tracker.monitoring.infrastructure.storage.AzureStorageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,11 +12,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,11 +21,12 @@ import java.util.Optional;
 @Tag(name = "Disease", description = "Gestión de enfermedades de mascotas")
 public class DiseaseController {
     private final DiseaseService diseaseService;
-    private final String IMAGE_DIR = "uploads/diseases";
+    private final AzureStorageService azureStorageService;
 
     @Autowired
-    public DiseaseController(DiseaseService diseaseService) {
+    public DiseaseController(DiseaseService diseaseService, AzureStorageService azureStorageService) {
         this.diseaseService = diseaseService;
+        this.azureStorageService = azureStorageService;
     }
 
     @Operation(summary = "Listar enfermedades de un dispositivo")
@@ -65,10 +63,13 @@ public class DiseaseController {
         disease.setSymptoms(symptoms);
         disease.setTreatment(treatment);
         disease.setObservations(observations);
+        
+        // Upload image to Azure Storage if provided
         if (image != null && !image.isEmpty()) {
-            String imagePath = saveImage(image);
-            disease.setImagePath(imagePath);
+            String imageUrl = azureStorageService.uploadFile(image, "diseases");
+            disease.setImagePath(imageUrl);
         }
+        
         Disease created = diseaseService.createDisease(disease);
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
@@ -86,6 +87,9 @@ public class DiseaseController {
             @RequestParam(required = false) String observations,
             @RequestParam(required = false) MultipartFile image
     ) throws IOException {
+        // Get existing disease to delete old image if new one is uploaded
+        Optional<Disease> existingDisease = diseaseService.getDiseaseById(diseaseId, deviceId);
+        
         Disease disease = new Disease();
         disease.setDeviceId(deviceId);
         disease.setName(name);
@@ -93,10 +97,20 @@ public class DiseaseController {
         disease.setSymptoms(symptoms);
         disease.setTreatment(treatment);
         disease.setObservations(observations);
+        
+        // Upload new image to Azure Storage if provided
         if (image != null && !image.isEmpty()) {
-            String imagePath = saveImage(image);
-            disease.setImagePath(imagePath);
+            // Delete old image if exists
+            if (existingDisease.isPresent() && existingDisease.get().getImagePath() != null) {
+                azureStorageService.deleteFile(existingDisease.get().getImagePath());
+            }
+            String imageUrl = azureStorageService.uploadFile(image, "diseases");
+            disease.setImagePath(imageUrl);
+        } else if (existingDisease.isPresent()) {
+            // Keep existing image if no new image provided
+            disease.setImagePath(existingDisease.get().getImagePath());
         }
+        
         Disease updated = diseaseService.updateDisease(diseaseId, deviceId, disease);
         return ResponseEntity.ok(updated);
     }
@@ -105,19 +119,13 @@ public class DiseaseController {
     @DeleteMapping("/{diseaseId}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> deleteDisease(@PathVariable String deviceId, @PathVariable Long diseaseId) {
+        // Get disease to delete associated image from Azure Storage
+        Optional<Disease> disease = diseaseService.getDiseaseById(diseaseId, deviceId);
+        if (disease.isPresent() && disease.get().getImagePath() != null) {
+            azureStorageService.deleteFile(disease.get().getImagePath());
+        }
+        
         diseaseService.deleteDisease(diseaseId, deviceId);
         return ResponseEntity.noContent().build();
-    }
-
-    /**
-     * Guarda la imagen en disco y retorna la ruta relativa.
-     */
-    private String saveImage(MultipartFile image) throws IOException {
-        File dir = new File(IMAGE_DIR);
-        if (!dir.exists()) dir.mkdirs();
-        String filename = System.currentTimeMillis() + "_" + image.getOriginalFilename();
-        Path path = Paths.get(IMAGE_DIR, filename);
-        Files.write(path, image.getBytes());
-        return path.toString();
     }
 }
